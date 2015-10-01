@@ -1,0 +1,95 @@
+#!/bin/bash
+
+########
+# vars #
+########
+
+DT=$(date "+%Y-%m-%dT%H-%M%S")
+SASLOG=""
+_SASLOG=""
+SASPROGAM=""
+SASPID=""
+
+########
+# fncs #
+########
+
+display_help() {
+    echo
+    echo "Run a SAS program in background, optionally redirecting the SAS log"
+    echo
+    echo "Usage: ${0} [option...] [SAS program] "
+    echo
+    echo "  -h, --help          display help"
+    echo "  -l, --log <file>    redirect log" 
+    echo
+    echo "Example: "
+    echo "  ${0} --log '/dir/to/log/myprogram.log' myprogram.sas"
+    echo 
+}
+
+create_logdt() {
+    SASLOG="${_SASLOG%.log}_${DT}.log"
+}
+
+########
+# args #
+########
+
+# Use > 1 to consume two arguments per pass in the loop
+#   each argument has a corresponding value to go with it
+# Use > 0 to consume one or more arguments per pass in the loop
+#   some arguments don't have a corresponding value to go with it
+
+while [[ $# > 0 ]]; do
+    key="$1"
+
+    case $key in
+        -h | --help)
+            display_help
+            exit 0
+            ;;
+        -l | --log)
+            SASLOG="$2"
+            shift
+            ;;
+        --logdt)
+            _SASLOG="$2"
+            create_logdt
+            shift
+            ;;
+        *)
+            SASPROGRAM="$1"
+            ;;
+    esac
+
+    shift
+
+done
+
+#######
+# run #
+#######
+
+if [ -n "$SASLOG" ]; then
+    nohup sas -log "$SASLOG" $SASPROGRAM > /dev/null 2>&1 &
+    SASPID="$!"
+else
+    nohup sas $SASPROGRAM > /dev/null 2>&1 &
+    SASLOG="${SASPROGRAM%.sas}.log"
+    SASPID="$!"
+fi
+
+########
+# echo #
+########
+echo 
+echo "Running SAS program"
+echo "  $SASPROGRAM"
+echo
+echo "PID of SAS program"
+echo "  $SASPID"
+echo
+echo "SAS log written to"
+echo "  $SASLOG"
+echo 
