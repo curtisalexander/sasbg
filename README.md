@@ -6,9 +6,9 @@ Run a SAS program in the background, optionally redirecting the SAS log
 * Redirect stdout and stderr to `/dev/null`
 * Optionally redirect the log
 * Optionally redirect the log, appending the execution datetime to the log filename
-* If neither log option is used (`--log` or `--logdt`), or if `--dt` option is used, then redirect the log to the same directory as the SAS program (rather than to the directory from which the script was called)
-* If use `--logdt` or `--dt` options, append the execution datetime to the log filename to enable repeated running of a SAS program without overwriting the log
-* Throws an error if the user attempts to write out a log with \*.sas extension as this could potentially overwrite the executing SAS program
+* If neither log option `--log` nor `--logdt` is used then redirect the log to the same directory as the SAS program (rather than to the directory from which the script was called)
+* If either log option `--logdt` or `--dt` is used then append the execution datetime to the log filename to enable repeated running of a SAS program without overwriting the log
+* Throws an error if the user attempts to write out a log with `*.sas` extension as this could potentially overwrite the executing SAS program
 
 ## Usage
 ```
