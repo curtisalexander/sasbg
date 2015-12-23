@@ -5,10 +5,16 @@
 ########
 
 DT=$(date "+%Y-%m-%d_%H-%M-%S")
+DTSWITCH=""
 SASLOG=""
 _SASLOG=""
+__SASLOG=""
 SASPROGAM=""
+_SASPROGAM=""
 SASPID=""
+BASEDIR=""
+ABSBASEDIR=""
+LOGEXT=""
 
 ########
 # fncs #
@@ -16,20 +22,42 @@ SASPID=""
 
 display_help() {
     echo
-    echo "Run a SAS program in background, optionally redirecting the SAS log"
+    echo "Run a SAS program in background, optionally redirecting the SAS log."
+    echo "If neither log option (--log or --logdt) is used, or if --dt option"
+    echo "  is used, then the log is written to the same directory as the"
+    echo "  SAS program."
     echo
     echo "Usage: ${0} [option...] [SAS program] "
     echo
     echo "  -h, --help          display help"
-    echo "  -l, --log <file>    redirect log" 
+    echo "  -l, --log <file>    redirect log"
+    echo "  --logdt <file>      redirect log, appending datetime to log filename"
+    echo "  --dt                append datetime to log filename, writing log to"
+    echo "                        same directory as SAS program"
     echo
     echo "Example: "
-    echo "  ${0} --log '/dir/to/log/myprogram.log' myprogram.sas"
-    echo 
+    echo "  ${0} --log '/dir/to/log/myprogram.log' myprogram.sas    # write log to specific directory"
+    echo "  ${0} --logdt '/dir/to/log/myprogram.log' myprogram.sas  # write log with datetime appended to"
+    echo "                                                          #   log filename to specific directory"
+    echo "  ${0} myprogram.sas          # write log to same directory as SAS program" 
+    echo "  ${0} --dt myprogram.sas     # write log with datetime appended to log filename"
+    echo "                              #   to same directory as SAS program"
+}
+
+create_logname() {
+    __SASLOG="${_SASPROGRAM%.sas}.log"
 }
 
 create_logdt() {
-    SASLOG="${_SASLOG%.log}_${DT}.log"
+    _SASLOG="${__SASLOG%.log}_${DT}.log"
+}
+
+get_extension() {
+    # $1 = filename
+    local FILENAME="$(basename "$1")"
+    local EXT="${FILENAME##*.}"
+    local FILE="${FILENAME%.*}"
+    echo $EXT
 }
 
 ########
@@ -50,16 +78,19 @@ while [[ $# > 0 ]]; do
             exit 0
             ;;
         -l | --log)
-            SASLOG="$2"
+            _SASLOG="$2"
             shift
             ;;
         --logdt)
-            _SASLOG="$2"
+            __SASLOG="$2"
             create_logdt
             shift
             ;;
+        --dt)
+            DTSWITCH="1"
+            ;;
         *)
-            SASPROGRAM="$1"
+            _SASPROGRAM="$1"
             ;;
     esac
 
@@ -71,14 +102,36 @@ done
 # run #
 #######
 
-if [ -n "$SASLOG" ]; then
-    nohup sas -log "$SASLOG" $SASPROGRAM > /dev/null 2>&1 &
-    SASPID="$!"
+SASPROGRAM="$(readlink -m ${_SASPROGRAM})"
+
+# -n = true if the length of the string is non-zero
+if [ -n "${_SASLOG}" ]; then
+    SASLOG="$(readlink -m ${_SASLOG})"
 else
-    nohup sas $SASPROGRAM > /dev/null 2>&1 &
-    SASLOG="${SASPROGRAM%.sas}.log"
-    SASPID="$!"
+    # determine whether to append datetime log
+    if [ -n "${DTSWITCH}" ]; then
+        create_logname  # requires $_SASPROGRAM and returns $__SASLOG
+        create_logdt    # requires $__SASLOG and returns $_SASLOG
+    else
+        _SASLOG="${_SASPROGRAM%.sas}.log"
+    fi
+    BASEDIR="$(dirname ${_SASPROGRAM})"
+    ABSBASEDIR="$(readlink -m ${BASEDIR})"
+    SASLOG="${ABSBASEDIR}/$(basename ${_SASLOG})"
 fi
+
+# make sure we are not overwriting the SAS program
+LOGEXT="$(get_extension ${SASLOG})"
+if [ "${LOGEXT}" == "sas" ]; then
+    echo
+    echo "The log file extension is *.sas, potentially overwriting"
+    echo "  the SAS program.  Please check that this is the desired output."
+    echo
+    exit 0
+fi
+
+nohup sas -log "$SASLOG" $SASPROGRAM > /dev/null 2>&1 &
+SASPID="$!"
 
 ########
 # echo #
