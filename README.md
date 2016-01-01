@@ -23,12 +23,12 @@ sasbg [option...] [SAS program]
 
 ## Examples
 ```
-$ sasbg --log '/dir/to/log/myprogram.log' myprogram.sas     # write log to specific directory
-$ sasbg --logdt '/dir/to/log/myprogram.log' myprogram.sas   # write log with datetime appended to
-                                                            #   log filename to specific directory
-$ sasbg myprogram.sas           # write log to same directory as SAS program
-$ sasbg --dt myprogram.sas      # write log with datetime appended to log filename
-                                #   to same directory as SAS program
+sasbg --log '/dir/to/log/myprogram.log' myprogram.sas     # write log to specific directory
+sasbg --logdt '/dir/to/log/myprogram.log' myprogram.sas   # write log with datetime appended to
+                                                          #   log filename to specific directory
+sasbg myprogram.sas           # write log to same directory as SAS program
+sasbg --dt myprogram.sas      # write log with datetime appended to log filename
+                              #   to same directory as SAS program
 ```
 
 ## Requirements
