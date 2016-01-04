@@ -27,7 +27,7 @@ display_help() {
     echo "  is used, then the log is written to the same directory as the"
     echo "  SAS program."
     echo
-    echo "Usage: ${0} [option...] [SAS program] "
+    echo "Usage: sasbg [option...] [SAS program] "
     echo
     echo "  -h, --help          display help"
     echo "  -l, --log <file>    redirect log"
@@ -36,11 +36,11 @@ display_help() {
     echo "                        same directory as SAS program"
     echo
     echo "Example: "
-    echo "  ${0} --log '/dir/to/log/myprogram.log' myprogram.sas    # write log to specific directory"
-    echo "  ${0} --logdt '/dir/to/log/myprogram.log' myprogram.sas  # write log with datetime appended to"
-    echo "                                                          #   log filename to specific directory"
-    echo "  ${0} myprogram.sas          # write log to same directory as SAS program" 
-    echo "  ${0} --dt myprogram.sas     # write log with datetime appended to log filename"
+    echo "  sasbg --log '/dir/to/log/myprogram.log' myprogram.sas       # write log to specific directory"
+    echo "  sasbg --logdt '/dir/to/log/myprogram.log' myprogram.sas     # write log with datetime appended to"
+    echo "                                                              #   log filename to specific directory"
+    echo "  sasbg myprogram.sas         # write log to same directory as SAS program" 
+    echo "  sasbg --dt myprogram.sas    # write log with datetime appended to log filename"
     echo "                              #   to same directory as SAS program"
 }
 
